@@ -1,30 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-	<title>three.js webgl - FBX loader</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<link type="text/css" rel="stylesheet" href="../css/main.css">
-</head>
-
-<body>
-	<div id="model_container">
-
-	</div>
-	<script type="importmap">
-			{
-				"imports": {
-					"three": "../build/three.module.js",
-					"three/addons/": "../jsm/"
-				}
-			}
-		</script>
-	<script type="module">
-		import * as THREE from 'three';
+import * as THREE from 'three';
 		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 		import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-		let camera, scene, renderer;
+		let camera, scene, renderer, animation, animationState;
 
 		const clock = new THREE.Clock();
 
@@ -32,6 +9,8 @@
 
 		init();
 		animate();
+        initControls();
+
 
 		function init() {
 
@@ -40,7 +19,7 @@
 			// Camera Parameteres ->  FOV, (Aspect ratio),near, far           
 			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 2000);
 			//position is a vector3 position
-			camera.position.set(200, 200, 300);
+			camera.position.set(300, 200, 700);
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0xa0a0a0);
@@ -58,10 +37,15 @@
 
 			// model
 			const loader = new FBXLoader();
-			loader.load('models/monitor_lenovo.fbx', function (object) {
+			loader.load('models/Waving.fbx', function (object) {
+                // console.log("object ",object.animations)
+				mixer = new THREE.AnimationMixer(object);
+                animation = mixer.clipAction(object.animations[0]);
+                //0 -> once, 1 -> infinite
+                animation.setLoop(1)
 
-				//mixer = new THREE.AnimationMixer(object);
-
+                animation.setEffectiveTimeScale(2);
+                animation.play();
 				object.traverse(function (child) {
 
 					if (child.isMesh) {
@@ -116,9 +100,19 @@
 
 
 		}
+        function initControls(){
+            const play = document.getElementById("play");
+            const pause = document.getElementById("pause");
+            const stop = document.getElementById("stop");
 
-	</script>
-
-</body>
-
-</html>
+            play.addEventListener("click", function(){
+                animation.paused= false;
+                animation.play();
+            });
+            pause.addEventListener("click", function(){
+                animation.paused= true;
+            });
+            stop.addEventListener("click", function(){
+                animation.stop();
+            });
+        }
