@@ -5,10 +5,13 @@
 	<title>three.js webgl - FBX loader</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<link type="text/css" rel="stylesheet" href="main.css">
+	<link type="text/css" rel="stylesheet" href="../css/main.css">
 </head>
 
 <body>
+	<div id="model_container">
+
+	</div>
 	<script type="importmap">
 			{
 				"imports": {
@@ -17,14 +20,11 @@
 				}
 			}
 		</script>
-
 	<script type="module">
-
 		import * as THREE from 'three';
 
 		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 		import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-
 		let camera, scene, renderer;
 
 		const clock = new THREE.Clock();
@@ -36,8 +36,7 @@
 
 		function init() {
 
-			const container = document.createElement('div');
-			container.style = "width:50%;";
+			const container = document.getElementById("model_container");
 			document.body.appendChild(container);
 			// Camera Parameteres ->  FOV, (Aspect ratio),near, far           
 			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 2000);
@@ -46,8 +45,8 @@
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0xa0a0a0);
-			
-			
+
+
 
 			const dirLight = new THREE.DirectionalLight(0xffffff, 5);
 			dirLight.position.set(0, 200, 100);
@@ -80,7 +79,8 @@
 
 			renderer = new THREE.WebGLRenderer({ antialias: true });
 			renderer.setPixelRatio(window.devicePixelRatio);
-			renderer.setSize(window.innerWidth, window.innerHeight);
+			//dimensions of the canvas which will contain the model redered (width, height)
+			renderer.setSize(600, 400);
 			renderer.shadowMap.enabled = true;
 			container.appendChild(renderer.domElement);
 
