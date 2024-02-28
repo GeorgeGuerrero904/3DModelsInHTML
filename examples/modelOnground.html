@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>three.js webgl - FBX loader</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="../css/main.css">
+</head>
+
+<body>
+	<div id="model_container">
+
+	</div>
+	<script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js",
+					"three/addons/": "../jsm/"
+				}
+			}
+		</script>
+	<script type="module">
+		//the script type must be a module in order to use imports
+		//these imports comes from the import map
+		import * as THREE from 'three';
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+		let camera, scene, renderer;
+		const clock = new THREE.Clock();
+		let mixer;
+
+		init();
+		animate();
+
+		function init() {
+			//get's the object where the model will be rendered
+			const container = document.getElementById("model_container");
+			document.body.appendChild(container);
+			// Camera Parameteres ->  FOV, (Aspect ratio),near, far           
+			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 2000);
+			//position is a vector3 position (x,y,z)
+			camera.position.set(400, 100, 400);
+
+			scene = new THREE.Scene();
+			//sets the scene background 0x means an exadecimal
+			scene.background = new THREE.Color(0xf5f5f5);
+			/*
+				a texture can be used as a background, see the example of loading a texture here
+				https://threejs.org/docs/?q=sce#api/en/textures/Texture
+			*/
+
+
+			let Lightintensity = 0.8;
+			//creates a directional light
+			//parameters -> color(hex), intensity
+			const dirLight1 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			//sets a position to the directional light, by defaul always point to (0,0,0)
+			dirLight1.position.set(0, 100, 500);
+
+
+			const dirLight2 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight2.position.set(0, 0, -500);
+
+			const dirLight3 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight3.position.set(500, 0, 0);
+
+			const dirLight4 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight4.position.set(-500, 0, 0);
+
+			const dirLight5 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight5.position.set(0, 500, 0);
+			
+			//adds lights to the scene
+			scene.add(dirLight1);
+			scene.add(dirLight2);
+			scene.add(dirLight3);
+			scene.add(dirLight4);
+			scene.add(dirLight5);
+
+
+
+            // ground
+				const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
+				mesh.rotation.x = - Math.PI / 2;
+				mesh.receiveShadow = true;
+				scene.add( mesh );
+
+				const grid = new THREE.GridHelper( 2000, 20, 0x000000, 0x000000 );
+				grid.material.opacity = 0.2;
+				grid.material.transparent = true;
+				scene.add( grid );
+
+
+			// loads model
+			const loader = new FBXLoader();
+			//path of the model based on the view location
+			loader.load('models/monitor_lenovo.fbx', function (object) {
+                object.position.set(0, 340, 0);
+				scene.add(object);
+			});
+
+			//adds a renderer for everything, this one use WebGL
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+
+
+			//dimensions of the canvas which will contain the model redered (width, height)
+			renderer.setSize(600, 400);
+			container.appendChild(renderer.domElement);
+
+			//adds the controls which will let the user to move around the model
+			const controls = new OrbitControls(camera, renderer.domElement);
+			controls.target.set(0, 0, 0);
+			controls.update();
+			
+			// this line should be added in order to rezise the canvas(container of the model) dimensions on window resize
+			//window.addEventListener('resize', onWindowResize);
+		}
+
+		function onWindowResize() {
+
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize(window.innerWidth, window.innerHeight);
+
+		}
+
+		//
+
+		function animate() {
+			requestAnimationFrame(animate);
+			const delta = clock.getDelta();
+			if (mixer) mixer.update(delta);
+			renderer.render(scene, camera);
+		}
+
+	</script>
+
+</body>
+
+</html>
