@@ -21,76 +21,89 @@
 			}
 		</script>
 	<script type="module">
+		//the script type must be a module in order to use imports
+		//these imports comes from the import map
 		import * as THREE from 'three';
 		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 		import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
 		let camera, scene, renderer;
-
 		const clock = new THREE.Clock();
-
 		let mixer;
 
 		init();
 		animate();
 
 		function init() {
-
+			//get's the object where the model will be rendered
 			const container = document.getElementById("model_container");
 			document.body.appendChild(container);
 			// Camera Parameteres ->  FOV, (Aspect ratio),near, far           
 			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 2000);
-			//position is a vector3 position
-			camera.position.set(200, 200, 300);
+			//position is a vector3 position (x,y,z)
+			camera.position.set(400, 100, 400);
 
 			scene = new THREE.Scene();
-			scene.background = new THREE.Color(0xa0a0a0);
+			//sets the scene background 0x means an exadecimal
+			scene.background = new THREE.Color(0xf5f5f5);
+			/*
+				a texture can be used as a background, see the example of loading a texture here
+				https://threejs.org/docs/?q=sce#api/en/textures/Texture
+			*/
+
+
+			let Lightintensity = 0.8;
+			//creates a directional light
+			//parameters -> color(hex), intensity
+			const dirLight1 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			//sets a position to the directional light, by defaul always point to (0,0,0)
+			dirLight1.position.set(0, 100, 500);
+
+
+			const dirLight2 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight2.position.set(0, 0, -500);
+
+			const dirLight3 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight3.position.set(500, 0, 0);
+
+			const dirLight4 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight4.position.set(-500, 0, 0);
+
+			const dirLight5 = new THREE.DirectionalLight(0xffffff, Lightintensity);
+			dirLight5.position.set(0, 500, 0);
+			
+			//adds lights to the scene
+			scene.add(dirLight1);
+			scene.add(dirLight2);
+			scene.add(dirLight3);
+			scene.add(dirLight4);
+			scene.add(dirLight5);
 
 
 
-			const dirLight = new THREE.DirectionalLight(0xffffff, 5);
-			dirLight.position.set(0, 200, 100);
-			dirLight.castShadow = true;
-			dirLight.shadow.camera.top = 180;
-			dirLight.shadow.camera.bottom = - 100;
-			dirLight.shadow.camera.left = - 120;
-			dirLight.shadow.camera.right = 120;
-			scene.add(dirLight);
-
-			// model
+			// loads model
 			const loader = new FBXLoader();
+			//path of the model based on the view location
 			loader.load('models/monitor_lenovo.fbx', function (object) {
-
-				//mixer = new THREE.AnimationMixer(object);
-
-				object.traverse(function (child) {
-
-					if (child.isMesh) {
-
-						child.castShadow = true;
-						child.receiveShadow = true;
-
-					}
-
-				});
-
 				scene.add(object);
 			});
 
+			//adds a renderer for everything, this one use WebGL
 			renderer = new THREE.WebGLRenderer({ antialias: true });
 			renderer.setPixelRatio(window.devicePixelRatio);
+
+
 			//dimensions of the canvas which will contain the model redered (width, height)
 			renderer.setSize(600, 400);
-			renderer.shadowMap.enabled = true;
 			container.appendChild(renderer.domElement);
 
+			//adds the controls which will let the user to move around the model
 			const controls = new OrbitControls(camera, renderer.domElement);
-			controls.target.set(0, 100, 0);
+			controls.target.set(0, 0, 0);
 			controls.update();
-
-			window.addEventListener('resize', onWindowResize);
-
-
-
+			
+			// this line should be added in order to rezise the canvas(container of the model) dimensions on window resize
+			//window.addEventListener('resize', onWindowResize);
 		}
 
 		function onWindowResize() {
@@ -105,16 +118,10 @@
 		//
 
 		function animate() {
-
 			requestAnimationFrame(animate);
-
 			const delta = clock.getDelta();
-
 			if (mixer) mixer.update(delta);
-
 			renderer.render(scene, camera);
-
-
 		}
 
 	</script>
